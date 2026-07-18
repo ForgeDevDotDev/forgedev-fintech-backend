@@ -1,6 +1,6 @@
-# ForgeDev Fintech Backend
+# ForgeDev Fintech (Backend)
 
-> Backend API for the Fintech domain — transactions, accounts, balances, audit logs
+> Banking dashboard + transactions API — Express + TypeScript + Prisma + SQLite
 
 **Part of [ForgeDev](https://forgedev.dev)** — Structured work simulation for junior developers.
 
@@ -30,7 +30,66 @@ Contributions are welcome! Please read:
 
 ## 🏗 Project Structure
 
-> TODO: Document the project structure once the codebase is built.
+```
+src/
+├── index.ts            # App entry point
+├── routes/             # API routes
+│   ├── index.ts        # Route aggregator
+│   ├── accounts.ts     # Account CRUD
+│   ├── transactions.ts # Transaction list/create/filter
+│   ├── transfers.ts    # Transfer between accounts
+│   ├── budgets.ts      # Budget CRUD
+│   ├── categories.ts   # Category CRUD
+│   └── auditLogs.ts    # Audit log read
+├── middleware/          # Express middleware
+│   ├── index.ts        # Error handler, request logger
+│   └── auth.ts         # Auth stub (TODO)
+├── models/             # Prisma client
+├── services/           # Business logic
+│   ├── transferService.ts
+│   └── auditService.ts
+├── utils/              # Utility functions
+└── tests/              # Test files
+prisma/
+├── schema.prisma       # Database schema
+└── seed.ts             # Seed data
+```
+
+---
+
+## 🚀 Getting Started
+
+```bash
+# Install dependencies
+npm install
+
+# Generate Prisma client
+npx prisma generate
+
+# Run migrations
+npx prisma migrate dev
+
+# Seed the database
+npm run prisma:seed
+
+# Start dev server
+npm run dev
+```
+
+---
+
+## 📊 Domain
+
+**Fintech — Banking dashboard + transactions API**
+
+Features:
+- Transaction feeds with pagination and filtering
+- Transfer flows between accounts
+- Budget analytics with category breakdowns
+- Account management (CRUD)
+- Audit logs for compliance
+
+All amounts are stored as **integer cents** (never floats).
 
 ---
 
@@ -44,9 +103,10 @@ Contributions are welcome! Please read:
 
 ## 📁 Related Repositories
 
-Backend API for the **Fintech** domain. Serves these frontends:
+Part of the **Fintech** domain:
 
-| Repo | Framework |
-|------|-----------|
-| forgedev-fintech-react | React |
-| forgedev-fintech-vue | Vue |
+| Repo | Role |
+|------|------|
+| forgedev-fintech-backend | Backend API (this repo) |
+| forgedev-fintech-vue | Vue 3 frontend |
+| forgedev-fintech-react | React frontend |

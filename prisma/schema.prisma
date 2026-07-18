@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  accounts  Account[]
+  auditLogs AuditLog[]
+}
+
+model Account {
+  id           String        @id @default(cuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id])
+  name         String
+  iban         String        @unique
+  balance      Int           @default(0) // Amount in cents
+  currency     String        @default("EUR")
+  type         String        @default("checking") // checking, savings, credit
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  transactions Transaction[]
+  transfersOut Transfer[]    @relation("fromAccount")
+  transfersIn  Transfer[]    @relation("toAccount")
+  budgets      Budget[]
+}
+
+model Transaction {
+  id          String    @id @default(cuid())
+  accountId   String
+  account     Account   @relation(fields: [accountId], references: [id])
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
+  amount      Int       // Positive = credit, negative = debit, in cents
+  description String
+  date        DateTime  @default(now())
+  merchant    String?
+  status      String    @default("completed") // pending, completed, failed
+  reference   String?
+  createdAt   DateTime  @default(now())
+}
+
+model Category {
+  id           String        @id @default(cuid())
+  name         String
+  icon         String?
+  color        String?
+  budgets      Budget[]
+  transactions Transaction[]
+}
+
+model Budget {
+  id         String   @id @default(cuid())
+  accountId  String
+  account    Account  @relation(fields: [accountId], references: [id])
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  limit      Int      // Budget limit in cents
+  period     String   @default("monthly") // weekly, monthly, yearly
+  startDate  DateTime @default(now())
+  endDate    DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Transfer {
+  id              String   @id @default(cuid())
+  fromAccountId   String
+  toAccountId     String
+  fromAccount     Account  @relation("fromAccount", fields: [fromAccountId], references: [id])
+  toAccount       Account  @relation("toAccount", fields: [toAccountId], references: [id])
+  amount          Int      // Transfer amount in cents
+  description     String?
+  status          String   @default("completed") // pending, completed, failed
+  reference       String?
+  createdAt       DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String   // e.g. "transfer.create", "account.update"
+  entity    String?  // e.g. "account", "transaction"
+  entityId  String?
+  metadata  String?  // JSON string
+  ipAddress String?
+  createdAt DateTime @default(now())
+}
